@@ -11,6 +11,7 @@ using namespace std;
 #define Width 31
 #define MAX_ENEMY 4
 #define MAX_WALL 25
+#define MAX_ENEMY_SEE_RANGE 4
 
 struct Bomb {
     int x, y;
@@ -56,7 +57,6 @@ bool doorActive = false;
 vector<Enemy> enemies;
 Bomb bomb;
 int bombRange = 1;
-int enemySeeRange = 4;
 
 bool inRange(int x, int y) {
     return x >= 0 && x < Height && y >= 0 && y < Width;
@@ -183,7 +183,7 @@ void moveEnemies() {
 
         int distX = abs(e.x - playerX);
         int distY = abs(e.y - playerY);
-        if (distX*distX + distY*distY <= enemySeeRange*enemySeeRange) {
+        if (distX*distX + distY*distY <= MAX_ENEMY_SEE_RANGE*MAX_ENEMY_SEE_RANGE) {
             calculateBestMove(nx, ny, e);
         }else{
             int dir = rand() % 4;
