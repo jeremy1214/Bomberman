@@ -55,6 +55,10 @@ int dy[4] = {1, 0, -1, 0};
 int playerX, playerY;
 bool playerAlive = true;
 
+int doorX, doorY;
+bool doorFound = false;
+bool doorActive = false;
+
 vector<Enemy> enemies;
 Bomb bomb;
 int bombRange = 1;
@@ -80,7 +84,7 @@ void generateEnemy(int numEnemy){
     
 }
 
-void generateBrokenWall(int numWall){
+void generateWall(int numWall){
     int x=1, y=1;
     for(int i=0; i<numWall; i++){
         while((x==1&&y==1)||(x==2&&y==1)||(x==1&&y==2)||baseMap[x][y]!=' '){
@@ -90,11 +94,28 @@ void generateBrokenWall(int numWall){
     }
 }
 
+void generateDoor(){
+    int cnt = 0, pur = 0;
+    for(int i=0; i<H; i++){
+        for(int j=0; j<W; j++){
+            if(baseMap[i][j] == '%'){
+                if(cnt == pur){
+                    doorX = i;
+                    doorY = j;
+                    return;
+                }
+                cnt++;
+            }
+        }
+    }
+}
+
 void initGame() {
     bomb.active = false;
     enemies.clear();
+    generateWall(MAX_WALL);
     generateEnemy(MAX_ENEMY);
-    generateBrokenWall(MAX_WALL);
+    generateDoor();
     for (int i = 0; i < H; i++) {
         displayGrid[i] = baseMap[i];
         for (int j = 0; j < W; j++) {
@@ -126,6 +147,10 @@ void placeBomb() {
     if (!bomb.active) {
         bomb = {playerX, playerY, 6, true};
     }
+}
+
+bool isfoundDoor(int x, int y) {
+    return x == doorX && y == doorY;
 }
 
 void explode() {
@@ -160,6 +185,9 @@ void explode() {
 
         if (displayGrid[x][y] == '%'){
             baseMap[x][y] = ' ';
+            if(isfoundDoor(x, y)){
+                doorFound = true;
+            }
         }
         displayGrid[x][y] = '*';
     }
@@ -190,6 +218,11 @@ void calculateBestMove(int &bestX, int &bestY, Enemy &e) {
     for (int d = 0; d < 4; d++) {
         int nx = e.x + dx[d];
         int ny = e.y + dy[d];
+        if (nx == playerX && ny == playerY){
+            bestX = nx;
+            bestY = ny;
+            return;
+        }
         if (!inRange(nx, ny) || displayGrid[nx][ny] != ' ')
             continue;
 
@@ -227,6 +260,12 @@ void moveEnemies() {
 
         if (e.x == playerX && e.y == playerY)
             playerAlive = false;
+    }
+}
+
+void updateDoor(){
+    if(doorFound && !doorActive){
+        baseMap[doorX][doorY] = 'D';
     }
 }
 
@@ -311,9 +350,9 @@ int main() {
         if (key == -1) break;
         if (key == 4) placeBomb();
         movePlayer(key);
-
         updateBomb();
         moveEnemies();
+        updateDoor();
         updateDisplay();
         draw();
 
@@ -321,6 +360,7 @@ int main() {
         for (auto &e : enemies) if (e.alive) aliveEnemies++;
 
         if (aliveEnemies == 0) {
+            doorActive = true;
             cout << "YOU WIN!\n";
             break;
         }
