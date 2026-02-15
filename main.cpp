@@ -7,8 +7,8 @@
 #include <windows.h>
 using namespace std;
 
-#define H 15
-#define W 31
+#define Height 15
+#define Width 31
 #define MAX_ENEMY 4
 #define MAX_WALL 25
 
@@ -23,7 +23,7 @@ struct Enemy {
     bool alive;
 };
 
-string baseMap[H] = {
+string baseMap[Height] = {
     "###############################",
     "#B    #     #     #     #     #",
     "#  #     #     #     #     #  #",
@@ -41,7 +41,7 @@ string baseMap[H] = {
     "###############################"
 };
 
-string displayGrid[H];
+string displayGrid[Height];
 
 int dx[4] = {0, 1, 0, -1};
 int dy[4] = {1, 0, -1, 0};
@@ -59,12 +59,12 @@ int bombRange = 1;
 int enemySeeRange = 4;
 
 bool inRange(int x, int y) {
-    return x >= 0 && x < H && y >= 0 && y < W;
+    return x >= 0 && x < Height && y >= 0 && y < Width;
 }
 
 void setRandomPos(int &x, int &y) {
-    x = rand() % H;
-    y = rand() % W;
+    x = rand() % Height;
+    y = rand() % Width;
 }
 
 void generateEnemy(int numEnemy){
@@ -90,8 +90,8 @@ void generateWall(int numWall){
 
 void generateDoor(){
     int cnt = 0, pur = 0;
-    for(int i=0; i<H; i++){
-        for(int j=0; j<W; j++){
+    for(int i=0; i<Height; i++){
+        for(int j=0; j<Width; j++){
             if(baseMap[i][j] == '%'){
                 if(cnt == pur){
                     doorX = i;
@@ -110,9 +110,9 @@ void initGame() {
     generateWall(MAX_WALL);
     generateEnemy(MAX_ENEMY);
     generateDoor();
-    for (int i = 0; i < H; i++) {
+    for (int i = 0; i < Height; i++) {
         displayGrid[i] = baseMap[i];
-        for (int j = 0; j < W; j++) {
+        for (int j = 0; j < Width; j++) {
             if (baseMap[i][j] == 'B') {
                 playerX = i;
                 playerY = j;
@@ -128,7 +128,7 @@ void initGame() {
 
 void draw() {
     cout << "\033[H";
-    for (int i = 0; i < H; i++) {
+    for (int i = 0; i < Height; i++) {
         cout << displayGrid[i] << endl;
     }
     cout << "Enemies left: ";
@@ -267,11 +267,11 @@ void updateDoor(){
 }
 
 void updateDisplay() {
-    for (int i = 0; i < H; i++)
+    for (int i = 0; i < Height; i++)
         displayGrid[i] = baseMap[i];
 
-    for (int i = 0; i < H; i++)
-        for (int j = 0; j < W; j++)
+    for (int i = 0; i < Height; i++)
+        for (int j = 0; j < Width; j++)
             if (displayGrid[i][j] == 'B' || displayGrid[i][j] == 'E')
                 displayGrid[i][j] = ' ';
 
