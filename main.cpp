@@ -250,14 +250,9 @@ void updateDisplay() {
         displayGrid[playerX][playerY] = 'B';
 }
 
-void movePlayer(char c) {
-    int dir = -1;
-    if (c == 'd') dir = 0;
-    if (c == 's') dir = 1;
-    if (c == 'a') dir = 2;
-    if (c == 'w') dir = 3;
-
-    if (dir == -1) return;
+void movePlayer(int d) {
+    int dir = d;
+    if (dir < 0 || dir > 3) return;
 
     int nx = playerX + dx[dir];
     int ny = playerY + dy[dir];
@@ -271,9 +266,30 @@ void movePlayer(char c) {
 
 int getKey() {
     if (_kbhit()) {
-        return tolower(_getch());
+        char c  = tolower(_getch());
+        int code = (int)c;
+        switch(code){
+            case 'w':
+            case 72:
+                return 3;
+            case 'a':
+            case 75:
+                return 2;
+            case 's':
+            case 80:
+                return 1;
+            case 'd':
+            case 77:
+                return 0;
+            case ' ':
+                return 4;
+            case 'q':
+                return -1;
+            default:
+                return -2;
+        }
     }
-    return 0;
+    return -2;
 }
 
 int main() {
@@ -287,10 +303,10 @@ int main() {
 
     while (running && playerAlive) {
 
-        char c = getKey();
-        if (c == 'q') break;
-        if (c == ' ') placeBomb();
-        movePlayer(c);
+        int key = getKey();
+        if (key == -1) break;
+        if (key == 4) placeBomb();
+        movePlayer(key);
 
         updateBomb();
         moveEnemies();
