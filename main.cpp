@@ -266,9 +266,13 @@ void movePlayer(int d) {
 
 int getKey() {
     if (_kbhit()) {
-        char c  = tolower(_getch());
-        int code = (int)c;
-        switch(code){
+        int ch = _getch();
+        if (ch == 0 || ch == 0xE0) { // 方向鍵或功能鍵
+            ch = _getch();
+        }else{
+            ch = int(tolower(ch));
+        }
+        switch(ch) {
             case 'w':
             case 72:
                 return 3;
