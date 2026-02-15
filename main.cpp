@@ -23,12 +23,6 @@ struct Enemy {
     bool alive;
 };
 
-struct Prize {
-    int x, y;
-    bool finded = false;
-    bool used = false;
-};
-
 string baseMap[H] = {
     "###############################",
     "#B    #     #     #     #     #",
@@ -253,13 +247,16 @@ void moveEnemies() {
             nx = e.x + dx[dir];
             ny = e.y + dy[dir];
         }
+
+        if (nx == playerX && ny == playerY)
+            playerAlive = false;
+
         if (displayGrid[nx][ny] == ' ') {
             e.x = nx;
             e.y = ny;
         }
 
-        if (e.x == playerX && e.y == playerY)
-            playerAlive = false;
+        
     }
 }
 
