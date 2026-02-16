@@ -203,15 +203,6 @@ void moveEnemies() {
     }
 }
 
-void updateBomb() {
-    if (bomb.active) {
-        bomb.timer--;
-        displayGrid[bomb.x][bomb.y] = 'o';
-        if (bomb.timer <= 0)
-            explode();
-    }
-}
-
 void updateDoor(){
     if(doorFound && !doorActive){
         baseMap[doorX][doorY] = 'D';
@@ -330,6 +321,15 @@ void explode() {
     }
 
     bomb.active = false;
+}
+
+void updateBomb() {
+    if (bomb.active) {
+        bomb.timer--;
+        displayGrid[bomb.x][bomb.y] = 'o';
+        if (bomb.timer <= 0)
+            explode();
+    }
 }
 
 void periodic(){
