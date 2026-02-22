@@ -333,6 +333,21 @@ void updateBomb() {
     }
 }
 
+void gameReady() {
+    cout << "Welcome to Bomberman!\n";
+    cout << "Use WASD or arrow keys to move, SPACE to place bomb, Q to quit.\n";
+    cout << "Press any key to start...\n";
+    _getch();
+}
+
+void gameWait() {
+    for (int i = 3; i > 0; i--) {
+         cout << "\033[3;1H";   // 游標移動到第3行第1列
+        cout << "Starting in " << i << "...\n";
+        Sleep(1000);
+    }
+}
+
 void periodic(){
     while (playerAlive) {
 
@@ -362,7 +377,11 @@ void periodic(){
 int main() {
     srand(time(0));
     system("cls");
-    cout << "\033[?25l";
+    cout << "\033[?25l"; //終端機中隱藏游標
+
+    gameReady();
+    gameWait();
+    system("cls");
 
     initGame();
 
@@ -371,6 +390,6 @@ int main() {
     if (!playerAlive)
         cout << "GAME OVER\n";
 
-    cout << "\033[?25h";
+    cout << "\033[?25h"; //終端機中顯示游標
     return 0;
 }
