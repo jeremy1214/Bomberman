@@ -71,7 +71,8 @@ bool isfoundDoor(int x, int y) {
     return x == doorX && y == doorY;
 }
 
-void calculateBestMove(int &bestX, int &bestY, Enemy &e) {
+
+void calculateBestMove(int &bestX, int &bestY, Enemy e) {
     int bestDist = 1e9;
     for (int d = 0; d < 4; d++) {
         int nx = e.x + dx[d];
