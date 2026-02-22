@@ -10,8 +10,10 @@ using namespace std;
 #define Height 15
 #define Width 31
 #define MAX_ENEMY 4
-#define MAX_WALL 25
+#define MAX_WALL 50
 #define MAX_ENEMY_SEE_RANGE 4
+#define MAX_GAME_TIME 100.0
+#define BOMB_TIMER 6
 
 struct Bomb {
     int x, y;
@@ -58,6 +60,8 @@ vector<Enemy> enemies;
 Bomb bomb;
 int bombRange = 1;
 
+double timer = MAX_GAME_TIME;
+
 bool inRange(int x, int y) {
     return x >= 0 && x < Height && y >= 0 && y < Width;
 }
@@ -71,6 +75,11 @@ bool isfoundDoor(int x, int y) {
     return x == doorX && y == doorY;
 }
 
+void updateClock(int delta = 150){
+    Sleep(delta);
+    double timePassed = delta / 1000.0;
+    timer -= timePassed;
+}
 
 void calculateBestMove(int &bestX, int &bestY, Enemy e) {
     int bestDist = 1e9;
@@ -99,9 +108,14 @@ void calculateBestMove(int &bestX, int &bestY, Enemy e) {
 
 void generateEnemy(int numEnemy){
     int x=1, y=1;
+    int distX = 0, distY = 0;
     for(int i=0; i<numEnemy; i++){
-        while((x==1&&y==1)||baseMap[x][y]!=' '){
+        distX = abs(x - 1);
+        distY = abs(y - 1);
+        while((distX<2||distY<2)||baseMap[x][y]!=' '){
             setRandomPos(x, y);
+            distX = abs(x - 1);
+            distY = abs(y - 1);
         }
         baseMap[x][y] = 'E';
     }
@@ -119,7 +133,7 @@ void generateWall(int numWall){
 }
 
 void generateDoor(){
-    int cnt = 0, pur = 0;
+    int cnt = 0, pur = rand() % MAX_WALL;
     for(int i=0; i<Height; i++){
         for(int j=0; j<Width; j++){
             if(baseMap[i][j] == '%'){
@@ -158,7 +172,7 @@ void initGame() {
 
 void placeBomb() {
     if (!bomb.active) {
-        bomb = {playerX, playerY, 6, true};
+        bomb = {playerX, playerY, BOMB_TIMER, true};
     }
 }
 
@@ -171,6 +185,11 @@ void movePlayer(int d) {
 
     if (displayGrid[nx][ny] == ' ')
     {
+        playerX = nx;
+        playerY = ny;
+    }
+
+    if (displayGrid[nx][ny] == 'D' && doorActive) {
         playerX = nx;
         playerY = ny;
     }
@@ -271,6 +290,7 @@ void draw() {
     int cnt = 0;
     for (auto &e : enemies) if (e.alive) cnt++;
     cout << cnt << endl;
+    cout << "Time left: " << timer << endl;
 }
 
 void explode() {
@@ -313,7 +333,7 @@ void explode() {
     }
 
     draw();
-    Sleep(300);
+    updateClock(300); 
 
     for (auto &p : fire) {
         int x = p.first;
@@ -360,17 +380,23 @@ void periodic(){
         updateDoor();
         updateDisplay();
         draw();
+        updateClock();
 
         int aliveEnemies = 0;
         for (auto &e : enemies) if (e.alive) aliveEnemies++;
 
-        if (aliveEnemies == 0) {
+        if (aliveEnemies == 0 && doorFound) {
             doorActive = true;
-            cout << "YOU WIN!\n";
-            break;
         }
 
-    Sleep(150);
+        if (doorActive && playerX == doorX && playerY == doorY) {
+            cout << "YOU WIN!\n";
+            return;
+        }
+        
+        if(timer <= 0){
+            playerAlive = false;
+        }
     }
 }
 
