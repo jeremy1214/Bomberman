@@ -7,10 +7,10 @@
 #include <windows.h>
 using namespace std;
 
-#define Height 15
-#define Width 31
+#define Height 13
+#define Width 26
 #define MAX_ENEMY 4
-#define MAX_WALL 50
+#define MAX_WALL 40
 #define MAX_ENEMY_SEE_RANGE 4
 #define MAX_GAME_TIME 100.0
 #define BOMB_TIMER 6
@@ -27,21 +27,19 @@ struct Enemy {
 };
 
 string baseMap[Height] = {
-    "###############################",
-    "#B    #     #     #     #     #",
-    "#  #     #     #     #     #  #",
-    "#     #     #     #     #     #",
-    "#  #     #     #     #     #  #",
-    "#     #     #     #     #     #",
-    "#  #     #     #     #     #  #",
-    "#     #     #     #     #     #",
-    "#  #     #     #     #     #  #",
-    "#     #     #     #     #     #",
-    "#  #     #     #     #     #  #",
-    "#     #     #     #     #     #",
-    "#  #     #     #     #     #  #",
-    "#     #     #     #     #     #",
-    "###############################"
+    "##########################",
+    "#B   #    #    #    #    #",
+    "#  #   #    #    #    #  #",
+    "#    #    #    #    #    #",
+    "#  #   #    #    #    #  #",
+    "#    #    #    #    #    #",
+    "#  #   #    #    #    #  #",
+    "#    #    #    #    #    #",
+    "#  #   #    #    #    #  #",
+    "#    #    #    #    #    #",
+    "#  #   #    #    #    #  #",
+    "#    #    #    #    #    #",
+    "##########################"
 };
 
 string displayGrid[Height];
@@ -125,7 +123,7 @@ void generateEnemy(int numEnemy){
 void generateWall(int numWall){
     int x=1, y=1;
     for(int i=0; i<numWall; i++){
-        while((x==1&&y==1)||(x==2&&y==1)||(x==1&&y==2)||baseMap[x][y]!=' '){
+        while((x<=2||y<=2)||baseMap[x][y]!=' '){
             setRandomPos(x, y);
         }
         baseMap[x][y] = '%';
@@ -148,7 +146,7 @@ void generateDoor(){
     }
 }
 
-void initGame() {
+void gameInit() {
     bomb.active = false;
     enemies.clear();
     generateWall(MAX_WALL);
@@ -409,7 +407,7 @@ int main() {
     gameWait();
     system("cls");
 
-    initGame();
+    gameInit();
 
     periodic();
 
