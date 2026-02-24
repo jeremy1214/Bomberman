@@ -110,7 +110,7 @@ void generateEnemy(int numEnemy){
     for(int i=0; i<numEnemy; i++){
         distX = abs(x - 1);
         distY = abs(y - 1);
-        while((distX<2||distY<2)||baseMap[x][y]!=' '){
+        while((distX<2&&distY<2)||baseMap[x][y]!=' '){
             setRandomPos(x, y);
             distX = abs(x - 1);
             distY = abs(y - 1);
@@ -123,7 +123,7 @@ void generateEnemy(int numEnemy){
 void generateWall(int numWall){
     int x=1, y=1;
     for(int i=0; i<numWall; i++){
-        while((x<=2||y<=2)||baseMap[x][y]!=' '){
+        while((x<=2&&y<=2)||baseMap[x][y]!=' '){
             setRandomPos(x, y);
         }
         baseMap[x][y] = '%';
