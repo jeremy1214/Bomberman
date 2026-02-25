@@ -7,14 +7,16 @@
 #include <windows.h>
 using namespace std;
 
-#define Height 13
-#define Width 26
-#define MAX_ENEMY 4
-#define MAX_WALL 40
-#define MAX_ENEMY_SEE_RANGE 4
-#define MAX_GAME_TIME 100.0
-#define BOMB_TIMER 6
 
+int maxEnemy = 4;
+int maxWall = 40;
+int maxEnemySeeRange = 4;
+double maxGameTime = 100.0;
+int bombTimer = 6;
+
+
+int height = 13;
+int width = 26;
 struct Bomb {
     int x, y;
     int timer;
@@ -26,7 +28,7 @@ struct Enemy {
     bool alive;
 };
 
-string baseMap[Height] = {
+string baseMap[13] = {
     "##########################",
     "#B   #    #    #    #    #",
     "#  #   #    #    #    #  #",
@@ -42,10 +44,10 @@ string baseMap[Height] = {
     "##########################"
 };
 
-string displayGrid[Height];
+string displayGrid[13];
 
-int dx[4] = {0, 1, 0, -1};
-int dy[4] = {1, 0, -1, 0};
+int dx[4] = {-1, 0, 1, 0};
+int dy[4] = {0, -1, 0, 1};
 
 int playerX, playerY;
 bool playerAlive = true;
@@ -58,15 +60,15 @@ vector<Enemy> enemies;
 Bomb bomb;
 int bombRange = 1;
 
-double timer = MAX_GAME_TIME;
+double timer = maxGameTime;
 
 bool inRange(int x, int y) {
-    return x >= 0 && x < Height && y >= 0 && y < Width;
+    return x >= 0 && x < height && y >= 0 && y < width;
 }
 
 void setRandomPos(int &x, int &y) {
-    x = rand() % Height;
-    y = rand() % Width;
+    x = rand() % height;
+    y = rand() % width;
 }
 
 bool isfoundDoor(int x, int y) {
@@ -110,7 +112,7 @@ void generateEnemy(int numEnemy){
     for(int i=0; i<numEnemy; i++){
         distX = abs(x - 1);
         distY = abs(y - 1);
-        while((distX<2&&distY<2)||baseMap[x][y]!=' '){
+        while((distX<4&&distY<4)||baseMap[x][y]!=' '){
             setRandomPos(x, y);
             distX = abs(x - 1);
             distY = abs(y - 1);
@@ -131,9 +133,9 @@ void generateWall(int numWall){
 }
 
 void generateDoor(){
-    int cnt = 0, pur = rand() % MAX_WALL;
-    for(int i=0; i<Height; i++){
-        for(int j=0; j<Width; j++){
+    int cnt = 0, pur = rand() % maxWall;
+    for(int i=0; i<height; i++){
+        for(int j=0; j<width; j++){
             if(baseMap[i][j] == '%'){
                 if(cnt == pur){
                     doorX = i;
@@ -149,12 +151,12 @@ void generateDoor(){
 void gameInit() {
     bomb.active = false;
     enemies.clear();
-    generateWall(MAX_WALL);
-    generateEnemy(MAX_ENEMY);
+    generateWall(maxWall);
+    generateEnemy(maxEnemy);
     generateDoor();
-    for (int i = 0; i < Height; i++) {
+    for (int i = 0; i < height; i++) {
         displayGrid[i] = baseMap[i];
-        for (int j = 0; j < Width; j++) {
+        for (int j = 0; j < width; j++) {
             if (baseMap[i][j] == 'B') {
                 playerX = i;
                 playerY = j;
@@ -170,7 +172,7 @@ void gameInit() {
 
 void placeBomb() {
     if (!bomb.active) {
-        bomb = {playerX, playerY, BOMB_TIMER, true};
+        bomb = {playerX, playerY, bombTimer, true};
     }
 }
 
@@ -201,7 +203,7 @@ void moveEnemies() {
 
         int distX = abs(e.x - playerX);
         int distY = abs(e.y - playerY);
-        if (distX*distX + distY*distY <= MAX_ENEMY_SEE_RANGE*MAX_ENEMY_SEE_RANGE) {
+        if (distX*distX + distY*distY <= maxEnemySeeRange*maxEnemySeeRange) {
             calculateBestMove(nx, ny, e);
         }else{
             int dir = rand() % 4;
@@ -228,11 +230,11 @@ void updateDoor(){
 }
 
 void updateDisplay() {
-    for (int i = 0; i < Height; i++)
+    for (int i = 0; i < height; i++)
         displayGrid[i] = baseMap[i];
 
-    for (int i = 0; i < Height; i++)
-        for (int j = 0; j < Width; j++)
+    for (int i = 0; i < height; i++)
+        for (int j = 0; j < width; j++)
             if (displayGrid[i][j] == 'B' || displayGrid[i][j] == 'E')
                 displayGrid[i][j] = ' ';
 
@@ -258,16 +260,16 @@ int getKey() {
         switch(ch) {
             case 'w':
             case 72:
-                return 3;
+                return 0;
             case 'a':
             case 75:
-                return 2;
+                return 1;
             case 's':
             case 80:
-                return 1;
+                return 2;
             case 'd':
             case 77:
-                return 0;
+                return 3;
             case ' ':
                 return 4;
             case 'q':
@@ -281,7 +283,7 @@ int getKey() {
 
 void draw() {
     cout << "\033[H";
-    for (int i = 0; i < Height; i++) {
+    for (int i = 0; i < height; i++) {
         cout << displayGrid[i] << endl;
     }
     cout << "Enemies left: ";
