@@ -9,8 +9,8 @@ using namespace std;
 
 
 int maxEnemy = 4;
-int maxWall = 40;
 int maxEnemySeeRange = 4;
+int maxWall = 40;
 double maxGameTime = 100.0;
 int bombTimer = 6;
 
