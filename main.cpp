@@ -20,11 +20,6 @@ int bombTimer = 6;
 int height = 13;
 int width = 26;
 
-struct Enemy {
-    int x, y;
-    bool alive;
-};
-
 int enemyX[4], enemyY[4];
 bool enemyAlive[4];
 
@@ -56,8 +51,6 @@ int doorX, doorY;
 bool doorFound = false;
 bool doorActive = false;
 
-vector<Enemy> enemies;
-
 int bombX, bombY;
 int bombTimerCounter = 0;
 bool bombActive = false;
@@ -84,11 +77,11 @@ void updateClock(int delta = 150){
     timer -= timePassed;
 }
 
-void calculateBestMove(int &bestX, int &bestY, Enemy e) {
+void calculateBestMove(int &bestX, int &bestY, int enemyIndex) {
     int bestDist = 1e9;
     for (int d = 0; d < 4; d++) {
-        int nx = e.x + dx[d];
-        int ny = e.y + dy[d];
+        int nx = enemyX[enemyIndex] + dx[d];
+        int ny = enemyY[enemyIndex] + dy[d];
         if (nx == playerX && ny == playerY){
             bestX = nx;
             bestY = ny;
@@ -153,11 +146,10 @@ void generateDoor(){
 
 void gameInit() {
     bombActive = false;
-    enemies.clear();
     generateWall(maxWall);
     generateEnemy(maxEnemy);
     generateDoor();
-    // int cntEnemy = 0;
+    int cntEnemy = 0;
     for (int i = 0; i < height; i++) {
         displayGrid[i] = baseMap[i];
         for (int j = 0; j < width; j++) {
@@ -167,11 +159,10 @@ void gameInit() {
                 displayGrid[i][j] = ' ';
             }
             if (baseMap[i][j] == 'E') {
-                enemies.push_back({j, i, true});
-                // enemyX[cntEnemy] = j;
-                // enemyY[cntEnemy] = i;
-                // enemyAlive[cntEnemy] = true;
-                // cntEnemy++;
+                enemyX[cntEnemy] = j;
+                enemyY[cntEnemy] = i;
+                enemyAlive[cntEnemy] = true;
+                cntEnemy++;
                 displayGrid[i][j] = ' ';
             }
         }
@@ -207,52 +198,28 @@ void movePlayer(int d) {
 }
 
 void moveEnemies() {
-    for (auto &e : enemies) {
-        if (!e.alive) continue;
+    for (int i = 0; i < maxEnemy; i++) {
+        if (!enemyAlive[i]) continue;
+       int nx = enemyX[i], ny = enemyY[i];
 
-        int nx = e.x, ny = e.y;
-
-        int distX = abs(e.x - playerX);
-        int distY = abs(e.y - playerY);
+        int distX = abs(enemyX[i] - playerX);
+        int distY = abs(enemyY[i] - playerY);
         if (distX*distX + distY*distY <= maxEnemySeeRange*maxEnemySeeRange) {
-            calculateBestMove(nx, ny, e);
+            calculateBestMove(nx, ny, i);
         }else{
             int dir = rand() % 4;
-            nx = e.x + dx[dir];
-            ny = e.y + dy[dir];
+            nx = enemyX[i] + dx[dir];
+            ny = enemyY[i] + dy[dir];
         }
-
+    
         if (nx == playerX && ny == playerY)
             playerAlive = false;
 
         if (displayGrid[ny][nx] == ' ') {
-            e.x = nx;
-            e.y = ny;
+            enemyX[i] = nx;
+            enemyY[i] = ny;
         }
     }
-
-    // for (int i = 0; i < maxEnemy; i++) {
-    //     if (!enemyAlive[i]) continue;
-    //    int nx = enemyX[i], ny = enemyY[i];
-
-    //     int distX = abs(enemyX[i] - playerX);
-    //     int distY = abs(enemyY[i] - playerY);
-    //     if (distX*distX + distY*distY <= maxEnemySeeRange*maxEnemySeeRange) {
-    //         calculateBestMove(nx, ny, i);
-    //     }else{
-    //         int dir = rand() % 4;
-    //         nx = enemyX[i] + dx[dir];
-    //         ny = enemyY[i] + dy[dir];
-    //     }
-    
-    //     if (nx == playerX && ny == playerY)
-    //         playerAlive = false;
-
-    //     if (displayGrid[ny][nx] == ' ') {
-    //         enemyX[i] = nx;
-    //         enemyY[i] = ny;
-    //     }
-    // }
 }
 
 void updateDoor(){
@@ -273,14 +240,10 @@ void updateDisplay() {
     if (bombActive)
         displayGrid[bombY][bombX] = 'o';
 
-    for (auto &e : enemies)
-        if (e.alive)
-            displayGrid[e.y][e.x] = 'E';
-
-    // for (int i=0; i<maxEnemy; i++) {
-    //     if (enemyAlive[i])
-    //         displayGrid[enemyY[i]][enemyX[i]] = 'E';
-    // }
+    for (int i=0; i<maxEnemy; i++) {
+        if (enemyAlive[i])
+            displayGrid[enemyY[i]][enemyX[i]] = 'E';
+    }
 
     if (playerAlive)
         displayGrid[playerY][playerX] = 'B';
@@ -325,10 +288,9 @@ void draw() {
     }
     cout << "Enemies left: ";
     int cnt = 0;
-    for (auto &e : enemies) if (e.alive) cnt++;
-    // for (int i=0; i<maxEnemy; i++) {
-    //     if (enemyAlive[i]) cnt++;
-    // }
+    for (int i=0; i<maxEnemy; i++) {
+        if (enemyAlive[i]) cnt++;
+    }
     cout << cnt << endl;
     cout << "Time left: " << timer << endl;
 }
@@ -359,15 +321,10 @@ void explode() {
         if (x == playerX && y == playerY)
             playerAlive = false;
 
-        for (auto &e : enemies) {
-            if (e.alive && e.x == x && e.y == y)
-                e.alive = false;
+        for (int i=0; i<maxEnemy; i++) {
+            if (enemyAlive[i] && enemyX[i] == x && enemyY[i] == y)
+                enemyAlive[i] = false;
         }
-
-        // for (int i=0; i<maxEnemy; i++) {
-        //     if (enemyAlive[i] && enemyX[i] == x && enemyY[i] == y)
-        //         enemyAlive[i] = false;
-        // }
 
         if (displayGrid[y][x] == '%'){
             baseMap[y][x] = ' ';
@@ -429,11 +386,10 @@ void periodic(){
         updateClock();
 
         int aliveEnemies = 0;
-        for (auto &e : enemies) if (e.alive) aliveEnemies++;
 
-        // for (int i=0; i<maxEnemy; i++) {
-        //     if (enemyAlive[i]) aliveEnemies++;
-        // }
+        for (int i=0; i<maxEnemy; i++) {
+            if (enemyAlive[i]) aliveEnemies++;
+        }
 
         if (aliveEnemies == 0 && doorFound) {
             doorActive = true;
