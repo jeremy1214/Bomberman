@@ -46,8 +46,8 @@ string baseMap[13] = {
 
 string displayGrid[13];
 
-int dx[4] = {-1, 0, 1, 0};
-int dy[4] = {0, -1, 0, 1};
+int dy[4] = {-1, 0, 1, 0};
+int dx[4] = {0, -1, 0, 1};
 
 int playerX, playerY;
 bool playerAlive = true;
@@ -63,12 +63,12 @@ int bombRange = 1;
 double timer = maxGameTime;
 
 bool inRange(int x, int y) {
-    return x >= 0 && x < height && y >= 0 && y < width;
+    return x >= 0 && x < width && y >= 0 && y < height;
 }
 
 void setRandomPos(int &x, int &y) {
-    x = rand() % height;
-    y = rand() % width;
+    x = rand() % width;
+    y = rand() % height;
 }
 
 bool isfoundDoor(int x, int y) {
@@ -91,7 +91,7 @@ void calculateBestMove(int &bestX, int &bestY, Enemy e) {
             bestY = ny;
             return;
         }
-        if (!inRange(nx, ny) || displayGrid[nx][ny] != ' ')
+        if (!inRange(nx, ny) || displayGrid[ny][nx] != ' ')
             continue;
 
         int dist = 0;
@@ -112,12 +112,12 @@ void generateEnemy(int numEnemy){
     for(int i=0; i<numEnemy; i++){
         distX = abs(x - 1);
         distY = abs(y - 1);
-        while((distX<4&&distY<4)||baseMap[x][y]!=' '){
+        while((distX<4&&distY<4)||baseMap[y][x]!=' '){
             setRandomPos(x, y);
             distX = abs(x - 1);
             distY = abs(y - 1);
         }
-        baseMap[x][y] = 'E';
+        baseMap[y][x] = 'E';
     }
     
 }
@@ -125,10 +125,10 @@ void generateEnemy(int numEnemy){
 void generateWall(int numWall){
     int x=1, y=1;
     for(int i=0; i<numWall; i++){
-        while((x<=2&&y<=2)||baseMap[x][y]!=' '){
+        while((x<=2&&y<=2)||baseMap[y][x]!=' '){
             setRandomPos(x, y);
         }
-        baseMap[x][y] = '%';
+        baseMap[y][x] = '%';
     }
 }
 
@@ -138,8 +138,8 @@ void generateDoor(){
         for(int j=0; j<width; j++){
             if(baseMap[i][j] == '%'){
                 if(cnt == pur){
-                    doorX = i;
-                    doorY = j;
+                    doorX = j;
+                    doorY = i;
                     return;
                 }
                 cnt++;
@@ -158,12 +158,12 @@ void gameInit() {
         displayGrid[i] = baseMap[i];
         for (int j = 0; j < width; j++) {
             if (baseMap[i][j] == 'B') {
-                playerX = i;
-                playerY = j;
+                playerX = j;
+                playerY = i;
                 displayGrid[i][j] = ' ';
             }
             if (baseMap[i][j] == 'E') {
-                enemies.push_back({i, j, true});
+                enemies.push_back({j, i, true});
                 displayGrid[i][j] = ' ';
             }
         }
@@ -183,13 +183,13 @@ void movePlayer(int d) {
     int nx = playerX + dx[dir];
     int ny = playerY + dy[dir];
 
-    if (displayGrid[nx][ny] == ' ')
+    if (displayGrid[ny][nx] == ' ')
     {
         playerX = nx;
         playerY = ny;
     }
 
-    if (displayGrid[nx][ny] == 'D' && doorActive) {
+    if (displayGrid[ny][nx] == 'D' && doorActive) {
         playerX = nx;
         playerY = ny;
     }
@@ -214,7 +214,7 @@ void moveEnemies() {
         if (nx == playerX && ny == playerY)
             playerAlive = false;
 
-        if (displayGrid[nx][ny] == ' ') {
+        if (displayGrid[ny][nx] == ' ') {
             e.x = nx;
             e.y = ny;
         }
@@ -225,7 +225,7 @@ void moveEnemies() {
 
 void updateDoor(){
     if(doorFound && !doorActive){
-        baseMap[doorX][doorY] = 'D';
+        baseMap[doorY][doorX] = 'D';
     }
 }
 
@@ -239,14 +239,14 @@ void updateDisplay() {
                 displayGrid[i][j] = ' ';
 
     if (bomb.active)
-        displayGrid[bomb.x][bomb.y] = 'o';
+        displayGrid[bomb.y][bomb.x] = 'o';
 
     for (auto &e : enemies)
         if (e.alive)
-            displayGrid[e.x][e.y] = 'E';
+            displayGrid[e.y][e.x] = 'E';
 
     if (playerAlive)
-        displayGrid[playerX][playerY] = 'B';
+        displayGrid[playerY][playerX] = 'B';
 }
 
 int getKey() {
@@ -304,10 +304,10 @@ void explode() {
             int nx = bomb.x + dx[d]*r;
             int ny = bomb.y + dy[d]*r;
             if (!inRange(nx, ny)) break;
-            if (displayGrid[nx][ny] == '#') break;
+            if (displayGrid[ny][nx] == '#') break;
 
             fire.push_back({nx, ny});
-            if (displayGrid[nx][ny] == '%') break;
+            if (displayGrid[ny][nx] == '%') break;
         }
     }
 
@@ -323,13 +323,13 @@ void explode() {
                 e.alive = false;
         }
 
-        if (displayGrid[x][y] == '%'){
-            baseMap[x][y] = ' ';
+        if (displayGrid[y][x] == '%'){
+            baseMap[y][x] = ' ';
             if(isfoundDoor(x, y)){
                 doorFound = true;
             }
         }
-        displayGrid[x][y] = '*';
+        displayGrid[y][x] = '*';
     }
 
     draw();
@@ -338,7 +338,7 @@ void explode() {
     for (auto &p : fire) {
         int x = p.first;
         int y = p.second;
-        displayGrid[x][y] = ' ';
+        displayGrid[y][x] = ' ';
     }
 
     bomb.active = false;
@@ -347,7 +347,7 @@ void explode() {
 void updateBomb() {
     if (bomb.active) {
         bomb.timer--;
-        displayGrid[bomb.x][bomb.y] = 'o';
+        displayGrid[bomb.y][bomb.x] = 'o';
         if (bomb.timer <= 0)
             explode();
     }
