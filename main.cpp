@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <conio.h>
 #include <windows.h>
+#include "Bomberman.hpp"
 using namespace std;
 
 
@@ -62,19 +63,12 @@ bool inRange(int x, int y) {
     return x >= 0 && x < width && y >= 0 && y < height;
 }
 
-void setRandomPos(int &x, int &y) {
-    x = rand() % width;
-    y = rand() % height;
+int abs(int x) {
+    return x < 0 ? -x : x;
 }
 
 bool isfoundDoor(int x, int y) {
     return x == doorX && y == doorY;
-}
-
-void updateClock(int delta = 150){
-    Sleep(delta);
-    double timePassed = delta / 1000.0;
-    timer -= timePassed;
 }
 
 void calculateBestMove(int &bestX, int &bestY, int enemyIndex) {
@@ -249,38 +243,6 @@ void updateDisplay() {
         displayGrid[playerY][playerX] = 'B';
 }
 
-int getKey() {
-    if (_kbhit()) {
-        int ch = _getch();
-        if (ch == 0 || ch == 0xE0) { // 方向鍵或功能鍵
-            ch = _getch();
-        }else{
-            ch = int(tolower(ch));
-        }
-        switch(ch) {
-            case 'w':
-            case 72:
-                return 0;
-            case 'a':
-            case 75:
-                return 1;
-            case 's':
-            case 80:
-                return 2;
-            case 'd':
-            case 77:
-                return 3;
-            case ' ':
-                return 4;
-            case 'q':
-                return -1;
-            default:
-                return -2;
-        }
-    }
-    return -2;
-}
-
 void draw() {
     cout << "\033[H";
     for (int i = 0; i < height; i++) {
@@ -297,9 +259,11 @@ void draw() {
 
 void explode() {
     int radius = bombRange;
-    vector<pair<int,int>> fire;
+    int fire[5][2];
+    int fireCount = 0;
 
-    fire.push_back({bombX, bombY});
+    fire[0][0] = bombX;
+    fire[0][1] = bombY;
 
     for (int d = 0; d < 4; d++) {
         for (int r = 1; r <= radius; r++) {
@@ -309,15 +273,16 @@ void explode() {
             if (!inRange(nx, ny)) break;
             if (displayGrid[ny][nx] == '#') break;
 
-            fire.push_back({nx, ny});
+            fire[fireCount+1][0] = nx;
+            fire[fireCount+1][1] = ny;
+            fireCount++;
             if (displayGrid[ny][nx] == '%') break;
         }
     }
 
-    for (auto &p : fire) {
-        int x = p.first;
-        int y = p.second;
-
+    for (int i=0; i<fireCount+1; i++) {
+        int x = fire[i][0];
+        int y = fire[i][1];
         if (x == playerX && y == playerY)
             playerAlive = false;
 
@@ -336,11 +301,11 @@ void explode() {
     }
 
     draw();
-    updateClock(300); 
+    timer -=updateClock(300); 
 
-    for (auto &p : fire) {
-        int x = p.first;
-        int y = p.second;
+    for (int i=0; i<fireCount+1; i++) {
+        int x = fire[i][0];
+        int y = fire[i][1];
         displayGrid[y][x] = ' ';
     }
 
@@ -356,21 +321,6 @@ void updateBomb() {
     }
 }
 
-void gameReady() {
-    cout << "Welcome to Bomberman!\n";
-    cout << "Use WASD or arrow keys to move, SPACE to place bomb, Q to quit.\n";
-    cout << "Press any key to start...\n";
-    _getch();
-}
-
-void gameWait() {
-    for (int i = 3; i > 0; i--) {
-         cout << "\033[3;1H";   // 游標移動到第3行第1列
-        cout << "Starting in " << i << "...\n";
-        Sleep(1000);
-    }
-}
-
 void periodic(){
     while (playerAlive) {
 
@@ -383,7 +333,7 @@ void periodic(){
         updateDoor();
         updateDisplay();
         draw();
-        updateClock();
+        timer -= updateClock();
 
         int aliveEnemies = 0;
 
