@@ -75,7 +75,7 @@ int calculateBestMove(int nx, int ny)
     {
         return 0;
     }
-    if (!inRange(nx, ny) || displayGrid[ny][nx] != ' ')
+    if (/*question 1*/)
     {
         return -1;
     }
@@ -126,7 +126,7 @@ void generateDoor()
     {
         for (int j = 0; j < width; j++)
         {
-            if (baseMap[i][j] == '%')
+            if (/*question 2*/)
             {
                 if (cnt == pur)
                 {
@@ -218,8 +218,8 @@ void moveEnemies()
             int bestDist = 100000;
             for (int d = 0; d < 4; d++)
             {
-                int tx = enemyX[i] + dx[d];
-                int ty = enemyY[i] + dy[d];
+                int tx = /*question 3*/
+                int ty = /*question 3*/
                 int dist = calculateBestMove(tx, ty);
                 if (dist < bestDist && dist != -1)
                 {
@@ -249,7 +249,7 @@ void moveEnemies()
 
 void updateDoor()
 {
-    if (doorFound)
+    if (/*question 4*/)
     {
         baseMap[doorY][doorX] = 'D';
     }
@@ -317,8 +317,8 @@ void explode()
             if (displayGrid[ny][nx] == '#')
                 break;
 
-            fire[fireCount + 1][0] = nx;
-            fire[fireCount + 1][1] = ny;
+            fire[/*question 5*/][0] = nx;
+            fire[/*question 5*/][1] = ny;
             fireCount++;
             if (displayGrid[ny][nx] == '%')
                 break;
@@ -334,7 +334,7 @@ void explode()
 
         for (int j = 0; j < maxEnemy; j++)
         {
-            if (enemyAlive[j] && enemyX[j] == x && enemyY[j] == y)
+            if (/*question 6*/)
                 enemyAlive[j] = false;
         }
 
@@ -356,7 +356,7 @@ void explode()
     {
         int x = fire[i][0];
         int y = fire[i][1];
-        displayGrid[y][x] = ' ';
+        /*question 7*/
     }
 
     bombActive = false;
@@ -368,7 +368,7 @@ void updateBomb()
     {
         bombTimerCounter--;
         displayGrid[bombY][bombX] = 'o';
-        if (bombTimerCounter <= 0)
+        if (/*question 8*/)
             explode();
     }
 }
@@ -383,7 +383,7 @@ void periodic()
         {
             break;
         }
-        if (key == 4)
+        if (/*question 9*/)
         {
             placeBomb();
         }
@@ -409,7 +409,7 @@ void periodic()
             doorActive = true;
         }
 
-        if (doorActive && playerX == doorX && playerY == doorY)
+        if (/*question 10*/)
         {
             cout << "YOU WIN!\n";
             return;
