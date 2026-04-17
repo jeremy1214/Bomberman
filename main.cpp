@@ -216,7 +216,7 @@ void moveEnemies()
         if (distX * distX + distY * distY <= maxEnemySeeRange * maxEnemySeeRange)
         {
             int bestDist = 100000;
-            for(int d = 0; d < 4; d++)
+            for (int d = 0; d < 4; d++)
             {
                 int tx = enemyX[i] + dx[d];
                 int ty = enemyY[i] + dy[d];
@@ -299,7 +299,7 @@ void draw()
 void explode()
 {
     int radius = bombRange;
-    int fire[1+4*radius][2];
+    int fire[1 + 4 * radius][2];
     int fireCount = 0;
 
     fire[0][0] = bombX;
@@ -379,13 +379,15 @@ void periodic()
     {
 
         int key = getKey();
-        if (key == -1){
+        if (key == -1)
+        {
             break;
         }
-        if (key == 4){
+        if (key == 4)
+        {
             placeBomb();
         }
-            
+
         movePlayer(key);
         updateBomb();
         moveEnemies();
