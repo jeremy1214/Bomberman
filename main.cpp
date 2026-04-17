@@ -12,8 +12,6 @@ int maxEnemySeeRange = 4;
 
 int maxWall = 40;
 
-double maxGameTime = 100.0;
-
 int bombTimer = 6;
 
 int height = 13;
@@ -54,7 +52,7 @@ int bombTimerCounter = 0;
 bool bombActive = false;
 int bombRange = 1;
 
-double timer = maxGameTime;
+double timer = 100.0;
 
 bool inRange(int x, int y)
 {
@@ -83,8 +81,8 @@ int calculateBestMove(int nx, int ny)
     }
 
     int dist = 0;
-    int distX = abs(nx - playerX);
-    int distY = abs(ny - playerY);
+    int distX = nx - playerX;
+    int distY = ny - playerY;
     dist = distX * distX + distY * distY;
 
     return dist;
@@ -251,7 +249,7 @@ void moveEnemies()
 
 void updateDoor()
 {
-    if (doorFound && !doorActive)
+    if (doorFound)
     {
         baseMap[doorY][doorX] = 'D';
     }
@@ -301,7 +299,7 @@ void draw()
 void explode()
 {
     int radius = bombRange;
-    int fire[5][2];
+    int fire[1+4*radius][2];
     int fireCount = 0;
 
     fire[0][0] = bombX;
@@ -334,10 +332,10 @@ void explode()
         if (x == playerX && y == playerY)
             playerAlive = false;
 
-        for (int i = 0; i < maxEnemy; i++)
+        for (int j = 0; j < maxEnemy; j++)
         {
-            if (enemyAlive[i] && enemyX[i] == x && enemyY[i] == y)
-                enemyAlive[i] = false;
+            if (enemyAlive[j] && enemyX[j] == x && enemyY[j] == y)
+                enemyAlive[j] = false;
         }
 
         if (displayGrid[y][x] == '%')
@@ -381,10 +379,13 @@ void periodic()
     {
 
         int key = getKey();
-        if (key == -1)
+        if (key == -1){
             break;
-        if (key == 4)
+        }
+        if (key == 4){
             placeBomb();
+        }
+            
         movePlayer(key);
         updateBomb();
         moveEnemies();
