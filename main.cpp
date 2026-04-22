@@ -88,37 +88,6 @@ int calculateBestMove(int nx, int ny)
     return dist;
 }
 
-void generateEnemy(int numEnemy)
-{
-    int x = 1, y = 1;
-    int distX = 0, distY = 0;
-    for (int i = 0; i < numEnemy; i++)
-    {
-        distX = abs(x - 1);
-        distY = abs(y - 1);
-        while ((distX < 4 && distY < 4) || baseMap[y][x] != ' ')
-        {
-            setRandomPos(x, y);
-            distX = abs(x - 1);
-            distY = abs(y - 1);
-        }
-        baseMap[y][x] = 'E';
-    }
-}
-
-void generateWall(int numWall)
-{
-    int x = 1, y = 1;
-    for (int i = 0; i < numWall; i++)
-    {
-        while ((x <= 2 && y <= 2) || baseMap[y][x] != ' ')
-        {
-            setRandomPos(x, y);
-        }
-        baseMap[y][x] = '%';
-    }
-}
-
 void generateDoor()
 {
     int cnt = 0, pur = rand() % maxWall;
@@ -143,8 +112,8 @@ void generateDoor()
 void gameInit()
 {
     bombActive = false;
-    generateWall(maxWall);
-    generateEnemy(maxEnemy);
+    generateWall(maxWall, baseMap);
+    generateEnemy(maxEnemy, baseMap);
     generateDoor();
     int cntEnemy = 0;
     for (int i = 0; i < height; i++)

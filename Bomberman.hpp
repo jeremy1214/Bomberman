@@ -61,3 +61,34 @@ void gameWait() {
         Sleep(1000);
     }
 }
+
+void generateEnemy(int numEnemy, string baseMap[])
+{
+    int x = 1, y = 1;
+    int distX = 0, distY = 0;
+    for (int i = 0; i < numEnemy; i++)
+    {
+        distX = abs(x - 1);
+        distY = abs(y - 1);
+        while ((distX < 4 && distY < 4) || baseMap[y][x] != ' ')
+        {
+            setRandomPos(x, y);
+            distX = abs(x - 1);
+            distY = abs(y - 1);
+        }
+        baseMap[y][x] = 'E';
+    }
+}
+
+void generateWall(int numWall, string baseMap[])
+{
+    int x = 1, y = 1;
+    for (int i = 0; i < numWall; i++)
+    {
+        while ((x <= 2 && y <= 2) || baseMap[y][x] != ' ')
+        {
+            setRandomPos(x, y);
+        }
+        baseMap[y][x] = '%';
+    }
+}
