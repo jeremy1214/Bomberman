@@ -88,7 +88,7 @@ int calculateBestMove(int nx, int ny)
     {
         return 0; // 如果是玩家位置，返回0 (最佳)
     }
-    if (/*question 1*/)
+    if (!inRange(nx, ny) || displayGrid[ny][nx] != ' ')
     {
         return -1; // 如果無效，返回-1
     }
@@ -109,7 +109,7 @@ void generateDoor()
     {
         for (int j = 0; j < width; j++)
         {
-            if (/*question 2*/)
+            if (baseMap[i][j] == '%')
             {
                 if (cnt == pur)
                 {
@@ -205,8 +205,8 @@ void moveEnemies()
             int bestDist = 100000;
             for (int d = 0; d < 4; d++)
             {
-                int tx = /*question 3*/ // 計算新位置
-                int ty = /*question 3*/
+                int tx = enemyX[i] + dx[d];
+                int ty = enemyY[i] + dy[d];
                 int dist = calculateBestMove(tx, ty);
                 if (dist < bestDist && dist != -1)
                 {
@@ -237,7 +237,7 @@ void moveEnemies()
 // 更新門狀態
 void updateDoor()
 {
-    if (/*question 4*/) // 如果條件滿足
+    if (doorFound) // 如果條件滿足
     {
         baseMap[doorY][doorX] = 'D'; // 顯示門
     }
@@ -308,8 +308,8 @@ void explode()
             if (displayGrid[ny][nx] == '#')
                 break; // 撞牆
 
-            fire[/*question 5*/][0] = nx;
-            fire[/*question 5*/][1] = ny;
+            fire[fireCount+1][0] = nx;
+            fire[fireCount+1][1] = ny;
             fireCount++;
             if (displayGrid[ny][nx] == '%')
                 break; // 撞軟牆
@@ -325,7 +325,7 @@ void explode()
 
         for (int j = 0; j < maxEnemy; j++)
         {
-            if (/*question 6*/) // 如果敵人在火焰範圍
+            if (enemyAlive[j] && enemyX[j]==x && enemyY[j]==y) // 如果敵人在火焰範圍
                 enemyAlive[j] = false; // 敵人死亡
         }
 
@@ -347,7 +347,7 @@ void explode()
     {
         int x = fire[i][0];
         int y = fire[i][1];
-        /*question 7*/ // 清空火焰
+        displayGrid[y][x] = ' '; // 清空火焰
     }
 
     bombActive = false; // 炸彈失效
@@ -360,7 +360,7 @@ void updateBomb()
     {
         bombTimerCounter--; // 計時器減一
         displayGrid[bombY][bombX] = 'o'; // 顯示炸彈
-        if (/*question 8*/) // 如果計時器到0
+        if (bombTimerCounter <= 0) // 如果計時器到0
             explode(); // 爆炸
     }
 }
@@ -376,7 +376,7 @@ void periodic()
         {
             break; // 退出
         }
-        if (/*question 9*/) // 如果按下放置空白鍵
+        if (key == 4) // 如果按下放置空白鍵
         {
             placeBomb(); // 放置炸彈
         }
@@ -402,7 +402,7 @@ void periodic()
             doorActive = true; // 激活門
         }
 
-        if (/*question 10*/) // 如果玩家到達門，且門可以使用
+        if (doorActive && playerX == doorX && playerY == doorY) // 如果玩家到達門，且門可以使用
         {
             cout << "YOU WIN!\n";
             return; // 勝利
