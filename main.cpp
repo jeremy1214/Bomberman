@@ -1,9 +1,3 @@
-#include <iostream>
-#include <string>
-#include <ctime>
-#include <cstdlib>
-#include <conio.h>
-#include <windows.h>
 #include "Bomberman.hpp"
 using namespace std;
 
@@ -63,16 +57,14 @@ int bombRange = 1;
 // 遊戲計時器
 double timer = 100.0;
 
+// 敵人移動計時器 (用來減速敵人)
+int enemyMoveCounter = 0;
+int enemyMoveInterval = 2; // 敵人每2個遊戲循環移動一次 (可調整此值以改變敵人速度)
+
 // 檢查座標是否在地圖範圍內
 bool inRange(int x, int y)
 {
     return x >= 0 && x < width && y >= 0 && y < height;
-}
-
-// 計算絕對值
-int abs(int x)
-{
-    return x < 0 ? -x : x;
 }
 
 // 檢查指定位置是否為門
@@ -202,7 +194,7 @@ void moveEnemies()
         int distY = abs(enemyY[i] - playerY);
         if (distX * distX + distY * distY <= maxEnemySeeRange * maxEnemySeeRange) // 如果玩家在視野內
         {
-            int bestDist = 100000;
+            int bestDist = INT_MAX;
             for (int d = 0; d < 4; d++)
             {
                 int tx = enemyX[i] + dx[d];
@@ -267,13 +259,18 @@ void updateDisplay()
         displayGrid[playerY][playerX] = 'B'; // 顯示玩家
 }
 
+
 // 繪製遊戲畫面
 void draw()
 {
     cout << "\033[H"; // 移動游標到左上角
     for (int i = 0; i < height; i++)
     {
-        cout << displayGrid[i] << endl; // 輸出地圖
+        for (int j = 0; j < width; j++)
+        {
+            printColoredChar(displayGrid[i][j]);
+        }
+        cout << endl; // 輸出地圖
     }
     cout << "Enemies left: ";
     int cnt = 0;
@@ -295,6 +292,7 @@ void explode()
 
     fire[0][0] = bombX;
     fire[0][1] = bombY; // 炸彈中心
+    fireCount++;
 
     for (int d = 0; d < 4; d++) // 四個方向
     {
@@ -308,15 +306,15 @@ void explode()
             if (displayGrid[ny][nx] == '#')
                 break; // 撞牆
 
-            fire[fireCount+1][0] = nx;
-            fire[fireCount+1][1] = ny;
+            fire[fireCount][0] = nx;
+            fire[fireCount][1] = ny;
             fireCount++;
             if (displayGrid[ny][nx] == '%')
                 break; // 撞軟牆
         }
     }
 
-    for (int i = 0; i < fireCount + 1; i++)
+    for (int i = 0; i < fireCount; i++)
     {
         int x = fire[i][0];
         int y = fire[i][1];
@@ -343,7 +341,7 @@ void explode()
     draw(); // 繪製爆炸畫面
     timer -= updateClock(300); // 延遲
 
-    for (int i = 0; i < fireCount + 1; i++)
+    for (int i = 0; i < fireCount; i++)
     {
         int x = fire[i][0];
         int y = fire[i][1];
@@ -383,7 +381,14 @@ void periodic()
 
         movePlayer(key); // 移動玩家
         updateBomb(); // 更新炸彈
-        moveEnemies(); // 移動敵人
+        
+        // 每隔enemyMoveInterval個遊戲循環移動敵人一次
+        enemyMoveCounter++;
+        if (enemyMoveCounter >= enemyMoveInterval) {
+            moveEnemies(); // 移動敵人
+            enemyMoveCounter = 0;
+        }
+        
         updateDoor(); // 更新門
         updateDisplay(); // 更新顯示
         draw(); // 繪製畫面
@@ -418,13 +423,12 @@ void periodic()
 // 主函數
 int main()
 {
-    srand(time(0)); // 初始化隨機種子
-    system("cls"); // 清屏
-    cout << "\033[?25l"; // 隱藏游標
-
+    // 初始化控制台
+    windowSetup();
+    
     gameReady(); // 遊戲準備
     gameWait(); // 等待開始
-    system("cls"); // 清屏
+    cleanup(); // 清理畫面
 
     gameInit(); // 初始化遊戲
 
@@ -433,6 +437,6 @@ int main()
     if (!playerAlive)
         cout << "GAME OVER\n"; // 遊戲結束
 
-    cout << "\033[?25h"; // 顯示游標
+    showCursor(); // 顯示游標
     return 0;
 }
