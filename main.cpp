@@ -1,22 +1,22 @@
 #include "Bomberman.hpp"
 using namespace std;
 
-// 遊戲常數定義
-int maxEnemy = 4; // 最大敵人數量
-int maxEnemySeeRange = 4; // 敵人視野範圍
+// Game constant definitions
+int maxEnemy = 4; // Maximum number of enemies
+int maxEnemySeeRange = 4; // Enemy vision range
 
-int maxWall = 40; // 最大牆壁數量
+int maxWall = 40; // Maximum number of walls
 
-int bombTimer = 6; // 炸彈計時器初始值
+int bombTimer = 6; // Initial bomb timer value
 
-int height = 13; // 地圖高度
-int width = 26; // 地圖寬度
+int height = 13; // Map height
+int width = 26; // Map width
 
-// 敵人位置和狀態
+// Enemy positions and states
 int enemyX[4], enemyY[4];
 bool enemyAlive[4];
 
-// 基礎地圖
+// Base map
 string baseMap[13] = {
     "##########################",
     "#B   #    #    #    #    #",
@@ -32,71 +32,71 @@ string baseMap[13] = {
     "#    #    #    #    #    #",
     "##########################"};
 
-// 顯示地圖
+// Display map
 string displayGrid[13];
 
-// 移動方向向量 (上, 左, 下, 右)
+// Movement direction vectors (up, left, down, right)
 int dy[4] = {-1, 0, 1, 0};
 int dx[4] = {0, -1, 0, 1};
 
-// 玩家位置和狀態
+// Player position and state
 int playerX, playerY;
 bool playerAlive = true;
 
-// 門的位置和狀態
+// Door position and state
 int doorX, doorY;
 bool doorFound = false;
 bool doorActive = false;
 
-// 炸彈位置和狀態
+// Bomb position and state
 int bombX, bombY;
 int bombTimerCounter = 0;
 bool bombActive = false;
 int bombRange = 1;
 
-// 遊戲計時器
+// Game timer
 double timer = 100.0;
 
-// 敵人移動計時器 (用來減速敵人)
+// Enemy move timer (used to slow enemies)
 int enemyMoveCounter = 0;
-int enemyMoveInterval = 2; // 敵人每2個遊戲循環移動一次 (可調整此值以改變敵人速度)
+int enemyMoveInterval = 2; // Enemies move every 2 game cycles (adjust this value to change enemy speed)
 
-// 檢查座標是否在地圖範圍內
+// Check if coordinates are within the map range
 bool inRange(int x, int y)
 {
     return x >= 0 && x < width && y >= 0 && y < height;
 }
 
-// 檢查指定位置是否為門
+// Check if the specified location is the door
 bool isfoundDoor(int x, int y)
 {
     return x == doorX && y == doorY;
 }
 
-// 計算敵人移動的最佳距離 (越小越好)
+// Calculate the best move distance for the enemy (smaller is better)
 int calculateBestMove(int nx, int ny)
 {
     if (nx == playerX && ny == playerY)
     {
-        return 0; // 如果是玩家位置，返回0 (最佳)
+        return 0; // If it's the player's position, return 0 (best)
     }
     if (!inRange(nx, ny) || displayGrid[ny][nx] != ' ')
     {
-        return -1; // 如果無效，返回-1
+        return -1; // If invalid, return -1
     }
 
     int dist = 0;
     int distX = nx - playerX;
     int distY = ny - playerY;
-    dist = distX * distX + distY * distY; // 計算歐幾里得距離平方
+    dist = distX * distX + distY * distY; // Calculate squared Euclidean distance
 
     return dist;
 }
 
-// 生成門的位置
+// Generate door position
 void generateDoor()
 {
-    int cnt = 0, pur = rand() % maxWall; // 隨機選擇一個牆壁位置
+    int cnt = 0, pur = rand() % maxWall; // Randomly select a wall position
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
@@ -115,84 +115,84 @@ void generateDoor()
     }
 }
 
-// 初始化遊戲
+// Initialize game
 void gameInit()
 {
     bombActive = false;
-    generateWall(maxWall, baseMap); // 生成牆壁
-    generateEnemy(maxEnemy, baseMap); // 生成敵人
-    generateDoor(); // 生成門
+    generateWall(maxWall, baseMap); // Generate walls
+    generateEnemy(maxEnemy, baseMap); // Generate enemies
+    generateDoor(); // Generate door
     int cntEnemy = 0;
     for (int i = 0; i < height; i++)
     {
-        displayGrid[i] = baseMap[i]; // 複製地圖
+        displayGrid[i] = baseMap[i]; // Copy map
         for (int j = 0; j < width; j++)
         {
-            if (baseMap[i][j] == 'B') // 找到玩家初始位置
+            if (baseMap[i][j] == 'B') // Find player's initial position
             {
                 playerX = j;
                 playerY = i;
-                displayGrid[i][j] = ' '; // 清空顯示
+                displayGrid[i][j] = ' '; // Clear display
             }
-            if (baseMap[i][j] == 'E') // 找到敵人初始位置
+            if (baseMap[i][j] == 'E') // Find enemy's initial position
             {
                 enemyX[cntEnemy] = j;
                 enemyY[cntEnemy] = i;
                 enemyAlive[cntEnemy] = true;
                 cntEnemy++;
-                displayGrid[i][j] = ' '; // 清空顯示
+                displayGrid[i][j] = ' '; // Clear display
             }
         }
     }
 }
 
-// 放置炸彈
+// Place bomb
 void placeBomb()
 {
-    if (!bombActive) // 如果沒有活躍炸彈
+    if (!bombActive) // If there is no active bomb
     {
         bombX = playerX;
         bombY = playerY;
-        bombTimerCounter = bombTimer; // 重置計時器
+        bombTimerCounter = bombTimer; // Reset timer
         bombActive = true;
     }
 }
 
-// 移動玩家
+// Move player
 void movePlayer(int d)
 {
     int dir = d;
     if (dir < 0 || dir > 3)
-        return; // 無效方向
+        return; // Invalid direction
 
     int nx = playerX + dx[dir];
     int ny = playerY + dy[dir];
 
-    if (displayGrid[ny][nx] == ' ') // 如果是空地
+    if (displayGrid[ny][nx] == ' ') // If it's empty space
     {
         playerX = nx;
         playerY = ny;
     }
 
-    if (displayGrid[ny][nx] == 'D' && doorActive) // 如果是門且門已激活
+    if (displayGrid[ny][nx] == 'D' && doorActive) // If it's the door and it's active
     {
         playerX = nx;
         playerY = ny;
     }
 }
 
-// 移動敵人
+// Move enemies
 void moveEnemies()
 {
     for (int i = 0; i < maxEnemy; i++)
     {
         if (!enemyAlive[i])
-            continue; // 跳過死亡敵人
+            continue; // Skip dead enemies
         int nx = enemyX[i], ny = enemyY[i];
 
         int distX = abs(enemyX[i] - playerX);
         int distY = abs(enemyY[i] - playerY);
-        if (distX * distX + distY * distY <= maxEnemySeeRange * maxEnemySeeRange) // 如果玩家在視野內
+        if (distX * distX + distY * distY <= maxEnemySeeRange * maxEnemySeeRange) // If the player is within sight
         {
             int bestDist = INT_MAX;
             for (int d = 0; d < 4; d++)
@@ -208,7 +208,7 @@ void moveEnemies()
                 }
             }
         }
-        else // 隨機移動
+        else // Random movement
         {
             int dir = rand() % 4;
             nx = enemyX[i] + dx[dir];
@@ -216,9 +216,9 @@ void moveEnemies()
         }
 
         if (nx == playerX && ny == playerY)
-            playerAlive = false; // 撞到玩家
+            playerAlive = false; // Collide with player
 
-        if (displayGrid[ny][nx] == ' ') // 如果是空地
+        if (displayGrid[ny][nx] == ' ') // If it's empty space
         {
             enemyX[i] = nx;
             enemyY[i] = ny;
@@ -226,75 +226,75 @@ void moveEnemies()
     }
 }
 
-// 更新門狀態
+// Update door state
 void updateDoor()
 {
-    if (doorFound) // 如果條件滿足
+    if (doorFound) // If condition is met
     {
-        baseMap[doorY][doorX] = 'D'; // 顯示門
+        baseMap[doorY][doorX] = 'D'; // Display door
     }
 }
 
-// 更新顯示地圖
+// Update display map
 void updateDisplay()
 {
     for (int i = 0; i < height; i++)
-        displayGrid[i] = baseMap[i]; // 複製基礎地圖
+        displayGrid[i] = baseMap[i]; // Copy Base map
 
     for (int i = 0; i < height; i++)
         for (int j = 0; j < width; j++)
             if (displayGrid[i][j] == 'B' || displayGrid[i][j] == 'E')
-                displayGrid[i][j] = ' '; // 清空玩家和敵人位置
+                displayGrid[i][j] = ' '; // Clear player and enemy positions
 
     if (bombActive)
-        displayGrid[bombY][bombX] = 'o'; // 顯示炸彈
+        displayGrid[bombY][bombX] = 'o'; // Display bomb
 
     for (int i = 0; i < maxEnemy; i++)
     {
         if (enemyAlive[i])
-            displayGrid[enemyY[i]][enemyX[i]] = 'E'; // 顯示敵人
+            displayGrid[enemyY[i]][enemyX[i]] = 'E'; // Display enemies
     }
 
     if (playerAlive)
-        displayGrid[playerY][playerX] = 'B'; // 顯示玩家
+        displayGrid[playerY][playerX] = 'B'; // Display player
 }
 
 
-// 繪製遊戲畫面
+// Draw game screen
 void draw()
 {
-    cout << "\033[H"; // 移動游標到左上角
+    cout << "\033[H"; // move cursor to top-left
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
         {
             printColoredChar(displayGrid[i][j]);
         }
-        cout << endl; // 輸出地圖
+        cout << endl; 
     }
     cout << "Enemies left: ";
     int cnt = 0;
     for (int i = 0; i < maxEnemy; i++)
     {
         if (enemyAlive[i])
-            cnt++; // 計算剩餘敵人數
+            cnt++; // Count alive enemies
     }
     cout << cnt << endl;
-    cout << "Time left: " << timer << endl; // 顯示剩餘時間
+    cout << "Time left: " << timer << endl; // Display remaining time
 }
 
-// 炸彈爆炸
+// Bomb explosion logic
 void explode()
 {
     int radius = bombRange;
-    int fire[1 + 4 * radius][2]; // 火焰位置陣列
+    int fire[1 + 4 * radius][2]; // Flame positions (center + 4 directions * radius)
     int fireCount = 0;
 
     fire[0][0] = bombX;
-    fire[0][1] = bombY; // 炸彈中心
+    fire[0][1] = bombY; // Bomb position
     fireCount++;
 
-    for (int d = 0; d < 4; d++) // 四個方向
+    for (int d = 0; d < 4; d++) // Four directions
     {
         for (int r = 1; r <= radius; r++)
         {
@@ -302,15 +302,15 @@ void explode()
             int ny = bombY + dy[d] * r;
 
             if (!inRange(nx, ny))
-                break; // 出界
+                break; // Out of range
             if (displayGrid[ny][nx] == '#')
-                break; // 撞牆
+                break; // Hit a solid wall
 
             fire[fireCount][0] = nx;
             fire[fireCount][1] = ny;
             fireCount++;
             if (displayGrid[ny][nx] == '%')
-                break; // 撞軟牆
+                break; // Hit a breakable wall
         }
     }
 
@@ -319,124 +319,124 @@ void explode()
         int x = fire[i][0];
         int y = fire[i][1];
         if (x == playerX && y == playerY)
-            playerAlive = false; // 玩家死亡
+            playerAlive = false; // Player dies if in flame range
 
         for (int j = 0; j < maxEnemy; j++)
         {
-            if (enemyAlive[j] && enemyX[j]==x && enemyY[j]==y) // 如果敵人在火焰範圍
-                enemyAlive[j] = false; // 敵人死亡
+            if (enemyAlive[j] && enemyX[j]==x && enemyY[j]==y) // If Enemy is in flame range
+                enemyAlive[j] = false; // Enemy dies
         }
 
-        if (displayGrid[y][x] == '%') // 如果是軟牆
+        if (displayGrid[y][x] == '%') // If it's a breakable wall
         {
-            baseMap[y][x] = ' '; // 摧毀牆壁
-            if (isfoundDoor(x, y)) // 如果是門
+            baseMap[y][x] = ' '; // Destroy the wall
+            if (isfoundDoor(x, y)) // If it's a door
             {
-                doorFound = true; // 找到門
+                doorFound = true; // Found the door
             }
         }
-        displayGrid[y][x] = '*'; // 顯示火焰
+        displayGrid[y][x] = '*'; // Display flame
     }
 
-    draw(); // 繪製爆炸畫面
-    timer -= updateClock(300); // 延遲
+    draw(); // Draw explosion screen
+    timer -= updateClock(300); // Delay for explosion effect
 
     for (int i = 0; i < fireCount; i++)
     {
         int x = fire[i][0];
         int y = fire[i][1];
-        displayGrid[y][x] = ' '; // 清空火焰
+        displayGrid[y][x] = ' '; // Clear flame
     }
 
-    bombActive = false; // 炸彈失效
+    bombActive = false; // Bomb is no longer active
 }
 
-// 更新炸彈狀態
+// Update bomb state
 void updateBomb()
 {
     if (bombActive)
     {
-        bombTimerCounter--; // 計時器減一
-        displayGrid[bombY][bombX] = 'o'; // 顯示炸彈
-        if (bombTimerCounter <= 0) // 如果計時器到0
-            explode(); // 爆炸
+        bombTimerCounter--; // Decrease bomb timer
+        displayGrid[bombY][bombX] = 'o'; // Display bomb
+        if (bombTimerCounter <= 0) // If timer runs out 
+            explode(); 
     }
 }
 
-// 主遊戲循環
+// Main game loop
 void periodic()
 {
     while (playerAlive)
     {
 
-        int key = getKey(); // 獲取按鍵
+        int key = getKey(); // Get player input
         if (key == -1)
         {
-            break; // 退出
+            break; // Quit
         }
-        if (key == 4) // 如果按下放置空白鍵
+        if (key == 4) // If Down key is pressed
         {
-            placeBomb(); // 放置炸彈
+            placeBomb(); // Place bomb
         }
 
-        movePlayer(key); // 移動玩家
-        updateBomb(); // 更新炸彈
-        
-        // 每隔enemyMoveInterval個遊戲循環移動敵人一次
+        movePlayer(key); // Move player
+        updateBomb(); // Update bomb state
+
+        // Every enemyMoveInterval game cycles, move enemies once
         enemyMoveCounter++;
         if (enemyMoveCounter >= enemyMoveInterval) {
-            moveEnemies(); // 移動敵人
+            moveEnemies(); // Move enemies
             enemyMoveCounter = 0;
         }
         
-        updateDoor(); // 更新門
-        updateDisplay(); // 更新顯示
-        draw(); // 繪製畫面
-        timer -= updateClock(); // 更新時間
+        updateDoor(); // Update door
+        updateDisplay(); // Update display
+        draw(); // Draw screen
+        timer -= updateClock(); // Update timer
 
         int aliveEnemies = 0;
 
         for (int i = 0; i < maxEnemy; i++)
         {
             if (enemyAlive[i])
-                aliveEnemies++; // 計算剩餘敵人
+                aliveEnemies++; // Calculate remaining enemies
         }
 
-        if (aliveEnemies == 0 && doorFound) // 如果敵人全滅且找到門
+        if (aliveEnemies == 0 && doorFound) // If all enemies are eliminated and the door is found
         {
-            doorActive = true; // 激活門
+            doorActive = true; // Activate the door
         }
 
-        if (doorActive && playerX == doorX && playerY == doorY) // 如果玩家到達門，且門可以使用
+        if (doorActive && playerX == doorX && playerY == doorY) // If the player reaches the door and it's active
         {
             cout << "YOU WIN!\n";
-            return; // 勝利
+            return; 
         }
 
-        if (timer <= 0) // 如果時間到
+        if (timer <= 0) // If time runs out
         {
-            playerAlive = false; // 遊戲結束
+            playerAlive = false; // Game over
         }
     }
 }
 
-// 主函數
+// Main function
 int main()
 {
-    // 初始化控制台
+    // Initialize console
     windowSetup();
     
-    gameReady(); // 遊戲準備
-    gameWait(); // 等待開始
-    cleanup(); // 清理畫面
+    gameReady(); // Game ready
+    gameWait(); // Game wait
+    cleanup(); // Cleanup screen
 
-    gameInit(); // 初始化遊戲
+    gameInit(); // Initialize game
 
-    periodic(); // 開始遊戲循環
+    periodic(); // Start game loop
 
     if (!playerAlive)
-        cout << "GAME OVER\n"; // 遊戲結束
+        cout << "GAME OVER\n"; // Game over
 
-    showCursor(); // 顯示游標
+    showCursor(); // Show cursor
     return 0;
 }

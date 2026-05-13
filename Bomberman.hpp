@@ -6,11 +6,11 @@
 #include <windows.h>
 using namespace std;
 
-// 獲取鍵盤輸入，返回方向或動作代碼
+// Get keyboard input, return direction or action code
 int getKey() {
     if (_kbhit()) {
         int ch = _getch();
-        if (ch == 0 || ch == 0xE0) { // 方向鍵或功能鍵
+        if (ch == 0 || ch == 0xE0) { // Arrow key or function key
             ch = _getch();
         }else{
             ch = int(tolower(ch));
@@ -18,47 +18,47 @@ int getKey() {
         switch(ch) {
             case 'w':
             case 72:
-                return 0; // 上
+                return 0; // Up
             case 'a':
             case 75:
-                return 1; // 左
+                return 1; // Left
             case 's':
             case 80:
-                return 2; // 下
+                return 2; // Down
             case 'd':
             case 77:
-                return 3; // 右
+                return 3; // Right
             case ' ':
-                return 4; // 放置炸彈
+                return 4; // Place bomb
             case 'q':
-                return -1; // 退出
+                return -1; // Quit
             default:
-                return -2; // 無效鍵
+                return -2; // Invalid key
         }
     }
-    return -2; // 無按鍵
+    return -2; // No key pressed
 }
 
-// 計算絕對值
+// Calculate absolute value
 int abs(int x)
 {
     return x < 0 ? -x : x;
 }
 
-// 設置隨機位置
+// Set random position
 void setRandomPos(int &x, int &y) {
     x = rand() % 26;
     y = rand() % 13;
 }
 
-// 更新時鐘，延遲並返回經過時間
+// Update clock, delay and return elapsed time
 double updateClock(int delta = 150){
     Sleep(delta);
     double timePassed = delta / 1000.0;
     return timePassed;
 }
 
-// 遊戲準備畫面
+// Game ready screen
 void gameReady() {
     cout << "Welcome to Bomberman!\n";
     cout << "Use WASD or arrow keys to move, SPACE to place bomb, Q to quit.\n";
@@ -66,16 +66,16 @@ void gameReady() {
     _getch();
 }
 
-// 遊戲倒計時等待
+// Game countdown wait
 void gameWait() {
     for (int i = 3; i > 0; i--) {
-         cout << "\033[3;1H";   // 游標移動到第3行第1列
+         cout << "\033[3;1H";   // Move cursor to row 3, column 1
         cout << "Starting in " << i << "...\n";
         Sleep(1000);
     }
 }
 
-// 生成敵人
+// Generate enemies
 void generateEnemy(int numEnemy, string baseMap[])
 {
     int x = 1, y = 1;
@@ -84,91 +84,91 @@ void generateEnemy(int numEnemy, string baseMap[])
     {
         distX = abs(x - 1);
         distY = abs(y - 1);
-        while ((distX < 4 && distY < 4) || baseMap[y][x] != ' ') // 確保不靠近玩家起始點且位置為空
+        while ((distX < 4 && distY < 4) || baseMap[y][x] != ' ') // Ensure not near the player's starting area and position is empty
         {
             setRandomPos(x, y);
             distX = abs(x - 1);
             distY = abs(y - 1);
         }
-        baseMap[y][x] = 'E'; // 放置敵人
+        baseMap[y][x] = 'E'; // Place enemy
     }
 }
 
-// 生成牆壁
+// Generate walls
 void generateWall(int numWall, string baseMap[])
 {
     int x = 1, y = 1;
     for (int i = 0; i < numWall; i++)
     {
-        while ((x <= 2 && y <= 2) || baseMap[y][x] != ' ') // 確保不靠近起始區域且位置為空
+        while ((x <= 2 && y <= 2) || baseMap[y][x] != ' ') // Ensure not near the starting area and position is empty
         {
             setRandomPos(x, y);
         }
-        baseMap[y][x] = '%'; // 放置牆壁
+        baseMap[y][x] = '%'; // Place wall
     }
 }
 
-// 列印帶顏色的字符
+// Print colored character
 void printColoredChar(char ch)
 {
-    string reset = "\033[0m";      // 重置顏色
-    string blue = "\033[94m";      // 亮藍色（堅硬牆壁）
-    string magenta = "\033[95m";   // 亮洋紅色（可破壞牆壁）
-    string green = "\033[92m";     // 亮綠色（玩家）
-    string red = "\033[91m";       // 亮紅色（敵人）
-    string yellow = "\033[93m";    // 亮黃色（炸彈）
-    string cyan = "\033[96m";      // 亮青色（門）
-    string orange = "\033[38;5;208m"; // 橙色（火焰）
+    string reset = "\033[0m";      // Reset color
+    string blue = "\033[94m";      // Bright blue (solid wall)
+    string magenta = "\033[95m";   // Bright magenta (breakable wall)
+    string green = "\033[92m";     // Bright green (player)
+    string red = "\033[91m";       // Bright red (enemy)
+    string yellow = "\033[93m";    // Bright yellow (bomb)
+    string cyan = "\033[96m";      // Bright cyan (door)
+    string orange = "\033[38;5;208m"; // Orange (fire)
     
     switch(ch)
     {
-        case '#':  // 堅硬牆壁
+        case '#':  // Solid wall
             cout << blue << ch << reset;
             break;
-        case '%':  // 可破壞牆壁
+        case '%':  // Breakable wall
             cout << magenta << ch << reset;
             break;
-        case 'B':  // 玩家
+        case 'B':  // Player
             cout << green << ch << reset;
             break;
-        case 'E':  // 敵人
+        case 'E':  // Enemy
             cout << red << ch << reset;
             break;
-        case 'o':  // 炸彈
+        case 'o':  // Bomb
             cout << yellow << ch << reset;
             break;
-        case 'D':  // 門
+        case 'D':  // Door
             cout << cyan << ch << reset;
             break;
-        case '*':  // 火焰
+        case '*':  // Flame
             cout << orange << ch << reset;
             break;
-        default:   // 空格和其他字符
+        default:   // Space and other characters
             cout << ch;
             break;
     }
 }
 
-// 初始化控制台窗口
+// Initialize console window
 void windowSetup() {
-    // 啟用虛擬終端處理以支持ANSI轉義碼
+    // Enable virtual terminal processing to support ANSI escape codes
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hOut, dwMode);
 
-    srand(time(0)); // 初始化隨機種子
-    system("cls"); // 清屏
-    cout << "\033[?25l"; // 隱藏游標
+    srand(time(0)); // Initialize random seed
+    system("cls"); // Clear screen
+    cout << "\033[?25l"; // Hide cursor
 }
 
-// 清理畫面
+// Cleanup screen
 void cleanup() {
-    system("cls"); // 清屏
+    system("cls"); // Clear screen
 }
 
-// 顯示游標
+// Show cursor
 void showCursor() {
-    cout << "\033[?25h"; // 顯示游標
+    cout << "\033[?25h"; // Show cursor
 }
