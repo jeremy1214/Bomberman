@@ -80,7 +80,7 @@ int calculateBestMove(int nx, int ny)
     {
         return 0; // If it's the player's position, return 0 (best)
     }
-    if (!inRange(nx, ny) || displayGrid[ny][nx] != ' ')
+    if (/*question 1*/)
     {
         return -1; // If invalid, return -1
     }
@@ -101,7 +101,7 @@ void generateDoor()
     {
         for (int j = 0; j < width; j++)
         {
-            if (baseMap[i][j] == '%')
+            if (/*question 2*/)
             {
                 if (cnt == pur)
                 {
@@ -130,14 +130,14 @@ void gameInit()
         {
             if (baseMap[i][j] == 'B') // Find player's initial position
             {
-                playerX = j;
-                playerY = i;
+                playerX = /*question 3*/;
+                playerY = /*question 3*/;
                 displayGrid[i][j] = ' '; // Clear display
             }
             if (baseMap[i][j] == 'E') // Find enemy's initial position
             {
-                enemyX[cntEnemy] = j;
-                enemyY[cntEnemy] = i;
+                enemyX[cntEnemy] = /*question 3*/;
+                enemyY[cntEnemy] = /*question 3*/;
                 enemyAlive[cntEnemy] = true;
                 cntEnemy++;
                 displayGrid[i][j] = ' '; // Clear display
@@ -197,8 +197,8 @@ void moveEnemies()
             int bestDist = INT_MAX;
             for (int d = 0; d < 4; d++)
             {
-                int tx = enemyX[i] + dx[d];
-                int ty = enemyY[i] + dy[d];
+                int tx = /*question 4*/;
+                int ty = /*question 4*/;
                 int dist = calculateBestMove(tx, ty);
                 if (dist < bestDist && dist != -1)
                 {
@@ -229,7 +229,7 @@ void moveEnemies()
 // Update door state
 void updateDoor()
 {
-    if (doorFound) // If condition is met
+    if (/*question 5*/) // If condition is met
     {
         baseMap[doorY][doorX] = 'D'; // Display door
     }
@@ -323,7 +323,7 @@ void explode()
 
         for (int j = 0; j < maxEnemy; j++)
         {
-            if (enemyAlive[j] && enemyX[j]==x && enemyY[j]==y) // If Enemy is in flame range
+            if (/*question 6*/) // If Enemy is in flame range
                 enemyAlive[j] = false; // Enemy dies
         }
 
@@ -345,7 +345,7 @@ void explode()
     {
         int x = fire[i][0];
         int y = fire[i][1];
-        displayGrid[y][x] = ' '; // Clear flame
+        /*question 7*/ // Clear flame
     }
 
     bombActive = false; // Bomb is no longer active
@@ -358,7 +358,7 @@ void updateBomb()
     {
         bombTimerCounter--; // Decrease bomb timer
         displayGrid[bombY][bombX] = 'o'; // Display bomb
-        if (bombTimerCounter <= 0) // If timer runs out 
+        if (/*question 8*/) // If timer runs out 
             explode(); 
     }
 }
@@ -374,7 +374,7 @@ void periodic()
         {
             break; // Quit
         }
-        if (key == 4) // If Down key is pressed
+        if (/*question 9*/) // If Down key is pressed
         {
             placeBomb(); // Place bomb
         }
@@ -407,7 +407,7 @@ void periodic()
             doorActive = true; // Activate the door
         }
 
-        if (doorActive && playerX == doorX && playerY == doorY) // If the player reaches the door and it's active
+        if (/*question 10*/) // If the player reaches the door and it's active
         {
             cout << "YOU WIN!\n";
             return; 
