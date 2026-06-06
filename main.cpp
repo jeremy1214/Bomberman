@@ -438,5 +438,6 @@ int main()
         cout << "GAME OVER\n"; // Game over
 
     showCursor(); // Show cursor
+    system("pause"); // Wait for user input before closing
     return 0;
 }
