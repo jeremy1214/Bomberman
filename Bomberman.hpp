@@ -151,12 +151,12 @@ void printColoredChar(char ch)
 
 // Initialize console window
 void windowSetup() {
-    // Enable virtual terminal processing to support ANSI escape codes
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD dwMode = 0;
-    GetConsoleMode(hOut, &dwMode);
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(hOut, dwMode);
+    // // Enable virtual terminal processing to support ANSI escape codes
+    // HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    // DWORD dwMode = 0;
+    // GetConsoleMode(hOut, &dwMode);
+    // dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    // SetConsoleMode(hOut, dwMode);
 
     srand(time(0)); // Initialize random seed
     system("cls"); // Clear screen
