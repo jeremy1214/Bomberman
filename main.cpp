@@ -103,7 +103,7 @@ void generateDoor()
         {
             if (/*question 2*/)
             {
-                if (cnt == pur)
+                if (cnt == pur) // reach the purpose
                 {
                     doorX = j;
                     doorY = i;
@@ -229,7 +229,7 @@ void moveEnemies()
 // Update door state
 void updateDoor()
 {
-    if (/*question 5*/) // If condition is met
+    if (/*question 5*/) // If door is found
     {
         baseMap[doorY][doorX] = 'D'; // Display door
     }
