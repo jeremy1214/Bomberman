@@ -2,7 +2,7 @@
 using namespace std;
 
 // Game constant definitions
-int maxEnemy = 4; // Maximum number of enemies
+const int maxEnemy = 4; // Maximum number of enemies
 int maxEnemySeeRange = 4; // Enemy vision range
 
 int maxWall = 40; // Maximum number of walls
