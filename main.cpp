@@ -13,8 +13,8 @@ int height = 13; // Map height
 int width = 26; // Map width
 
 // Enemy positions and states
-int enemyX[4], enemyY[4];
-bool enemyAlive[4];
+int enemyX[maxEnemy], enemyY[maxEnemy];
+bool enemyAlive[maxEnemy];
 
 // Base map
 string baseMap[13] = {
@@ -130,14 +130,14 @@ void gameInit()
         {
             if (baseMap[i][j] == 'B') // Find player's initial position
             {
-                playerX = /*question 3*/;
-                playerY = /*question 3*/;
+                playerX = /*question 3*/
+                playerY = /*question 3*/
                 displayGrid[i][j] = ' '; // Clear display
             }
             if (baseMap[i][j] == 'E') // Find enemy's initial position
             {
-                enemyX[cntEnemy] = /*question 3*/;
-                enemyY[cntEnemy] = /*question 3*/;
+                enemyX[cntEnemy] = /*question 3*/
+                enemyY[cntEnemy] = /*question 3*/
                 enemyAlive[cntEnemy] = true;
                 cntEnemy++;
                 displayGrid[i][j] = ' '; // Clear display
@@ -197,8 +197,8 @@ void moveEnemies()
             int bestDist = INT_MAX;
             for (int d = 0; d < 4; d++)
             {
-                int tx = /*question 4*/;
-                int ty = /*question 4*/;
+                int tx = /*question 4*/
+                int ty = /*question 4*/
                 int dist = calculateBestMove(tx, ty);
                 if (dist < bestDist && dist != -1)
                 {
